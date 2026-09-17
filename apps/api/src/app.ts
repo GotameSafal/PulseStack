@@ -11,6 +11,8 @@ import sensiblePlugin from "./plugins/sensible";
 import dbPlugin, { DbPluginOptions } from "./plugins/db";
 import authPlugin, { AuthPluginOptions } from "./plugins/auth";
 import authRoutes from "./routes/auth";
+import organizationRoutes from "./routes/organizations";
+import projectRoutes from "./routes/projects";
 
 export interface AppOptions extends FastifyServerOptions {
   dbOptions?: DbPluginOptions;
@@ -38,6 +40,8 @@ export async function buildApp(opts: AppOptions = {}): Promise<FastifyInstance> 
 
   // Register route groups
   await app.register(authRoutes, { prefix: "/v1/auth" });
+  await app.register(organizationRoutes, { prefix: "/v1/organizations" });
+  await app.register(projectRoutes, { prefix: "/v1/projects" });
 
   app.get("/health", async () => {
     return { status: "ok", timestamp: new Date().toISOString() };
