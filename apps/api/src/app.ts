@@ -9,9 +9,12 @@ import {
 } from "fastify-type-provider-zod";
 import sensiblePlugin from "./plugins/sensible";
 import dbPlugin, { DbPluginOptions } from "./plugins/db";
+import authPlugin, { AuthPluginOptions } from "./plugins/auth";
+import authRoutes from "./routes/auth";
 
 export interface AppOptions extends FastifyServerOptions {
   dbOptions?: DbPluginOptions;
+  authOptions?: AuthPluginOptions;
 }
 
 export async function buildApp(opts: AppOptions = {}): Promise<FastifyInstance> {
@@ -31,6 +34,10 @@ export async function buildApp(opts: AppOptions = {}): Promise<FastifyInstance> 
   await app.register(cookie);
 
   await app.register(dbPlugin, opts.dbOptions || {});
+  await app.register(authPlugin, opts.authOptions || {});
+
+  // Register route groups
+  await app.register(authRoutes, { prefix: "/v1/auth" });
 
   app.get("/health", async () => {
     return { status: "ok", timestamp: new Date().toISOString() };
