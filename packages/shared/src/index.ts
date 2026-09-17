@@ -2,4 +2,8 @@ export * from "./schemas/auth.schema";
 export * from "./schemas/organization.schema";
 export * from "./schemas/project.schema";
 export * from "./schemas/apiKey.schema";
+export * from "./schemas/telemetry.schema";
+export * from "./schemas/analytics.schema";
+export * from "./schemas/alert.schema";
+export * from "./schemas/incident.schema";
 export * from "./types";

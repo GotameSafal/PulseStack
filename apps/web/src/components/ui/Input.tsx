@@ -7,10 +7,11 @@ export interface InputProps extends Omit<HeroInputProps, "errorMessage" | "label
   error?: string;
   label?: string;
   isInvalid?: boolean;
+  startContent?: React.ReactNode;
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ error, label, isInvalid, className, style, ...props }, ref) => {
+  ({ error, label, isInvalid, className, style, startContent, ...props }, ref) => {
     return (
       <HeroTextField
         isInvalid={isInvalid || !!error}
@@ -21,10 +22,17 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <div className="relative">
+        <div className="relative flex items-center">
+          {startContent && (
+            <div className="absolute left-3 flex items-center pointer-events-none text-muted-foreground">
+              {startContent}
+            </div>
+          )}
           <HeroInput
             ref={ref}
             className={`border border-border hover:border-foreground focus:border-foreground bg-transparent rounded-xl px-3 py-2 w-full text-sm outline-none transition-all ${
+              startContent ? "pl-9" : ""
+            } ${
               isInvalid || error ? "border-danger focus:border-danger" : ""
             } ${className || ""}`}
             style={style}

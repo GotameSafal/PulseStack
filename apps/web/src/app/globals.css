@@ -24,28 +24,53 @@
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
   --radius: 0.5rem;
+
+  /* PulseStack Telemetry Status Colors */
+  --ps-success: 142 71% 45%;
+  --ps-warning: 38 92% 50%;
+  --ps-danger: 0 84% 60%;
+  --ps-info: 199 89% 48%;
+
+  /* PulseStack Brand Accent (Indigo) */
+  --ps-indigo: 239 84% 67%;
+
+  /* PulseStack Chart Palette */
+  --ps-chart-volume: #6366f1;
+  --ps-chart-p50: #60a5fa;
+  --ps-chart-p90: #818cf8;
+  --ps-chart-p95: #f59e0b;
+  --ps-chart-p99: #f43f5e;
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 240 5.9% 10%;
-  --secondary: 240 3.7% 15.9%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --accent: 240 3.7% 15.9%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 62.8% 30.6%;
+  --background: 224 25% 6%;
+  --foreground: 210 20% 98%;
+  --card: 224 20% 9%;
+  --card-foreground: 210 20% 98%;
+  --popover: 224 22% 10%;
+  --popover-foreground: 210 20% 98%;
+  --primary: 239 84% 67%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 224 18% 12%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 224 18% 12%;
+  --muted-foreground: 217 12% 64%;
+  --accent: 224 18% 12%;
+  --accent-foreground: 210 20% 98%;
+  --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
-  --ring: 240 4.9% 83.9%;
+  --border: 224 15% 16%;
+  --input: 224 15% 16%;
+  --ring: 239 84% 67%;
+
+  /* PulseStack Telemetry Status Colors (same in dark) */
+  --ps-success: 142 71% 45%;
+  --ps-warning: 38 92% 50%;
+  --ps-danger: 0 84% 60%;
+  --ps-info: 199 89% 48%;
+
+  /* PulseStack Brand Accent */
+  --ps-indigo: 239 84% 67%;
 }
 
 @theme inline {

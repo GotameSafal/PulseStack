@@ -6,9 +6,11 @@
   "scripts": {
     "build": "pnpm --filter \"./packages/*\" --filter \"./apps/*\" build",
     "lint": "pnpm --recursive lint",
-    "test": "pnpm --recursive test"
+    "test": "pnpm --recursive test",
+    "test:e2e": "pnpm --filter @pulsestack/api exec vitest run tests/e2e"
   },
   "devDependencies": {
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.8"
   }
 }
