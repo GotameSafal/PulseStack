@@ -40,3 +40,9 @@ coverage/
 
 # Legacy archive
 archive/
+
+# Ignored project meta & legacy
+.github/
+.planning/
+.superpowers/
+legacy/
