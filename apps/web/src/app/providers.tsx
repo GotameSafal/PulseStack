@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -31,6 +33,15 @@ export function Providers({ children }: ProvidersProps) {
         disableTransitionOnChange
       >
         {children}
+        <ToastContainer
+          position="bottom-right"
+          autoClose={3500}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          pauseOnHover
+          theme="colored"
+        />
       </ThemeProvider>
     </QueryClientProvider>
   );

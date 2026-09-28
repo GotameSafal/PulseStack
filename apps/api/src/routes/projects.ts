@@ -13,6 +13,7 @@ import {
   organizationMembers,
   apiKeys,
 } from "@pulsestack/database";
+import { deleteTelemetryForProject } from "@pulsestack/clickhouse";
 
 const projectRoutes: FastifyPluginAsyncZod = async (fastify) => {
   // All endpoints require authentication
@@ -128,6 +129,46 @@ const projectRoutes: FastifyPluginAsyncZod = async (fastify) => {
     }
   );
 
+  // GET /v1/projects/:id - get single project
+  fastify.get(
+    "/:id",
+    {
+      schema: {
+        params: z.object({
+          id: z.string().min(1),
+        }),
+        response: {
+          200: ProjectResponseSchema,
+        },
+      },
+    },
+    async (request) => {
+      const { id: projectId } = request.params;
+      const { userId } = request.user;
+
+      const [project] = await fastify.db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1);
+
+      if (!project) {
+        throw fastify.httpErrors.notFound("Project not found");
+      }
+
+      await assertOrgMembership(project.organizationId, userId);
+
+      return {
+        id: project.id,
+        organizationId: project.organizationId,
+        name: project.name,
+        slug: project.slug,
+        environment: project.environment as any,
+        createdAt: project.createdAt,
+      };
+    }
+  );
+
   // POST /v1/projects/:id/api-keys - generate an API key
   fastify.post(
     "/:id/api-keys",
@@ -194,6 +235,125 @@ const projectRoutes: FastifyPluginAsyncZod = async (fastify) => {
     }
   );
 
+  // GET /v1/projects/:id/api-keys - list all API keys for a project
+  fastify.get(
+    "/:id/api-keys",
+    {
+      schema: {
+        params: z.object({
+          id: z.string().min(1),
+        }),
+        response: {
+          200: z.array(ApiKeyResponseSchema),
+        },
+      },
+    },
+    async (request) => {
+      const { id: projectId } = request.params;
+      const { userId } = request.user;
+
+      const [project] = await fastify.db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1);
+
+      if (!project) {
+        throw fastify.httpErrors.notFound("Project not found");
+      }
+
+      await assertOrgMembership(project.organizationId, userId);
+
+      const keys = await fastify.db
+        .select()
+        .from(apiKeys)
+        .where(eq(apiKeys.projectId, projectId));
+
+      return keys.map((k) => ({
+        id: k.id,
+        projectId: k.projectId,
+        name: k.name,
+        keyPrefix: k.keyPrefix,
+        rateLimitTier: k.rateLimitTier,
+        lastUsedAt: k.lastUsedAt,
+        createdAt: k.createdAt,
+      }));
+    }
+  );
+
+  // POST /v1/projects/:id/api-keys/:keyId/rotate - rotate an existing API key
+  fastify.post(
+    "/:id/api-keys/:keyId/rotate",
+    {
+      schema: {
+        params: z.object({
+          id: z.string().min(1),
+          keyId: z.string().min(1),
+        }),
+        response: {
+          200: ApiKeyResponseSchema,
+        },
+      },
+    },
+    async (request) => {
+      const { id: projectId, keyId } = request.params;
+      const { userId } = request.user;
+
+      const [project] = await fastify.db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1);
+
+      if (!project) {
+        throw fastify.httpErrors.notFound("Project not found");
+      }
+
+      await assertOrgMembership(project.organizationId, userId);
+
+      const [existingKey] = await fastify.db
+        .select()
+        .from(apiKeys)
+        .where(and(eq(apiKeys.id, keyId), eq(apiKeys.projectId, projectId)))
+        .limit(1);
+
+      if (!existingKey) {
+        throw fastify.httpErrors.notFound("API key not found");
+      }
+
+      // Invalidate old key cache in Redis
+      if (existingKey.keyPrefix) {
+        await fastify.redis.del(`apikey:${existingKey.keyPrefix}`);
+      }
+
+      // Generate replacement secret key
+      const randomSecret = crypto.randomBytes(24).toString("hex");
+      const secretKey = `ps_live_${randomSecret}`;
+      const keyPrefix = secretKey.slice(0, 16);
+      const keyHash = crypto.createHash("sha256").update(secretKey).digest("hex");
+
+      const [updatedKey] = await fastify.db
+        .update(apiKeys)
+        .set({
+          keyPrefix,
+          keyHash,
+        })
+        .where(eq(apiKeys.id, keyId))
+        .returning();
+
+      return {
+        id: updatedKey.id,
+        projectId: updatedKey.projectId,
+        name: updatedKey.name,
+        keyPrefix: updatedKey.keyPrefix,
+        secretKey, // Return new secret key once
+        rateLimitTier: updatedKey.rateLimitTier,
+        lastUsedAt: updatedKey.lastUsedAt,
+        createdAt: updatedKey.createdAt,
+      };
+    }
+  );
+
   // DELETE /v1/projects/:id/api-keys/:keyId - revoke an API key
   fastify.delete(
     "/:id/api-keys/:keyId",
@@ -243,6 +403,46 @@ const projectRoutes: FastifyPluginAsyncZod = async (fastify) => {
         success: true,
         message: "API key revoked successfully",
       };
+    }
+  );
+
+  // DELETE /v1/projects/:id - delete project and all its telemetry
+  fastify.delete(
+    "/:id",
+    {
+      schema: {
+        params: z.object({ id: z.string().uuid() }),
+        response: {
+          200: z.object({ success: z.boolean(), message: z.string() }),
+        },
+      },
+    },
+    async (request) => {
+      const { id: projectId } = request.params;
+      const { userId } = request.user;
+
+      const [project] = await fastify.db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, projectId))
+        .limit(1);
+
+      if (!project) {
+        throw fastify.httpErrors.notFound("Project not found");
+      }
+
+      await assertOrgMembership(project.organizationId, userId);
+
+      // Delete the project row. PG FK cascades will remove:
+      //   api_keys, alert_rules, incidents (via alert_rules cascade)
+      await fastify.db.delete(projects).where(eq(projects.id, projectId));
+
+      // Kick off async ClickHouse telemetry purge (don't await — Postgres is source of truth)
+      deleteTelemetryForProject(fastify.clickhouse, projectId).catch((err) => {
+        fastify.log.warn({ err, projectId }, "ClickHouse telemetry delete failed (non-fatal)");
+      });
+
+      return { success: true, message: "Project deleted successfully" };
     }
   );
 };

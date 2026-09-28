@@ -6,4 +6,5 @@ export * from "./schemas/telemetry.schema";
 export * from "./schemas/analytics.schema";
 export * from "./schemas/alert.schema";
 export * from "./schemas/incident.schema";
+export * from "./schemas/notification.schema";
 export * from "./types";

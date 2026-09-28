@@ -18,10 +18,12 @@ import projectAccessPlugin from "./plugins/projectAccess";
 import authRoutes from "./routes/auth";
 import organizationRoutes from "./routes/organizations";
 import projectRoutes from "./routes/projects";
+import userRoutes from "./routes/users";
 import ingestRoutes from "./routes/ingest";
 import analyticsRoutes from "./routes/analytics";
 import alertRoutes from "./routes/alerts";
 import incidentRoutes from "./routes/incidents";
+import notificationChannelRoutes from "./routes/notificationChannels";
 
 export interface AppOptions extends FastifyServerOptions {
   dbOptions?: DbPluginOptions;
@@ -58,10 +60,12 @@ export async function buildApp(opts: AppOptions = {}): Promise<FastifyInstance> 
   await app.register(authRoutes, { prefix: "/v1/auth" });
   await app.register(organizationRoutes, { prefix: "/v1/organizations" });
   await app.register(projectRoutes, { prefix: "/v1/projects" });
+  await app.register(userRoutes, { prefix: "/v1/users" });
   await app.register(ingestRoutes, { prefix: "/v1" });
   await app.register(analyticsRoutes, { prefix: "/v1/projects" });
   await app.register(alertRoutes, { prefix: "/v1/projects" });
   await app.register(incidentRoutes, { prefix: "/v1/projects" });
+  await app.register(notificationChannelRoutes, { prefix: "/v1/projects" });
 
   app.get("/health", async () => {
     return { status: "ok", timestamp: new Date().toISOString() };

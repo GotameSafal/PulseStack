@@ -6,6 +6,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import type { IncidentResponse } from "@pulsestack/shared";
 import { MasterTable } from "@/components/table/MasterTable";
 import { Button } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { IncidentDetailModal } from "./IncidentDetailModal";
 import { useIncidents } from "@/features/incidents/hooks/useIncidents";
 
@@ -183,25 +184,19 @@ export function IncidentsPanel({ projectId }: IncidentsPanelProps) {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-danger/10">
-            <Siren className="h-5 w-5 text-danger" aria-hidden="true" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">Incidents</h1>
-            <p className="text-sm text-muted-foreground">
-              Alert-triggered incidents — auto-refreshes every 30 s
-            </p>
-          </div>
-        </div>
-
-        <FilterTabs
-          value={statusFilter}
-          onChange={setStatusFilter}
-          openCount={openCount}
-        />
-      </div>
+      <PageHeader
+        title="Incidents"
+        description="Alert-triggered incidents — auto-refreshes every 30 s"
+        icon={<Siren className="h-5 w-5" aria-hidden="true" />}
+        iconColor="bg-danger/10 text-danger"
+        actions={
+          <FilterTabs
+            value={statusFilter}
+            onChange={setStatusFilter}
+            openCount={openCount}
+          />
+        }
+      />
 
       {/* Summary strip */}
       {!isLoading && !isError && (

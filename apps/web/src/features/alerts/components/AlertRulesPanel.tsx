@@ -7,6 +7,7 @@ import type { AlertRuleResponse } from "@pulsestack/shared";
 import { MasterTable } from "@/components/table/MasterTable";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { PageHeader } from "@/components/ui/PageHeader";
 import { AlertRuleFormModal } from "./AlertRuleFormModal";
 import { useAlertRules } from "@/features/alerts/hooks/useAlertRules";
 import {
@@ -253,28 +254,23 @@ export function AlertRulesPanel({ projectId }: AlertRulesPanelProps) {
   return (
     <div className="space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-            <Bell className="h-5 w-5 text-primary" aria-hidden="true" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">Alert Rules</h1>
-            <p className="text-sm text-muted-foreground">
-              Monitor metrics and trigger incidents automatically
-            </p>
-          </div>
-        </div>
-        <Button
-          id="create-alert-rule-btn"
-          variant="primary"
-          onPress={openCreate}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" aria-hidden="true" />
-          New Rule
-        </Button>
-      </div>
+      <PageHeader
+        title="Alert Rules"
+        description="Monitor metrics and trigger incidents automatically"
+        icon={<Bell className="h-5 w-5" aria-hidden="true" />}
+        iconColor="bg-primary/10 text-primary"
+        actions={
+          <Button
+            id="create-alert-rule-btn"
+            variant="primary"
+            onPress={openCreate}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" aria-hidden="true" />
+            New Rule
+          </Button>
+        }
+      />
 
       {/* Error state */}
       {isError && (

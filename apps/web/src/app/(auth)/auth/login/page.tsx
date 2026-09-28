@@ -1,38 +1,74 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { toast } from "react-toastify";
 import { useAuthStore } from "@/lib/auth/authStore";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { DynamicForm, DynamicFormSchema } from "@/components/forms/DynamicForm";
 import { ShieldAlert } from "lucide-react";
+import axiosInstance from "@/api/setup/axiosInstance";
+import { setAuthCookieAction } from "@/actions/authCookies";
+
+const loginSchema: DynamicFormSchema = {
+  fields: [
+    {
+      name: "email",
+      label: "Email Address",
+      type: "email",
+      placeholder: "admin@example.com",
+      required: true,
+    },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      placeholder: "••••••••",
+      required: true,
+    },
+  ],
+};
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handleLoginSubmit = async (formData: Record<string, unknown>) => {
+    const { email, password } = formData as { email: string; password: string };
 
-    // Simulated login API wrapper request response
-    setTimeout(async () => {
+    try {
+      const { data } = await axiosInstance.post<{
+        id: string;
+        name: string;
+        email: string;
+        token: string;
+        activeOrganizationId?: string;
+      }>("/auth/login", { email, password });
+
+      // Securely set HTTP cookie via Next.js Server Action
+      await setAuthCookieAction(data.token);
+
       await login(
         {
-          id: "1",
-          name: "Administrator Account",
-          email: email,
+          id: data.id,
+          name: data.name,
+          email: data.email,
           role: "ADMIN",
           permissions: ["USER_CREATE", "USER_READ", "USER_UPDATE", "USER_DELETE"],
+          organizationId: data.activeOrganizationId,
         },
-        "mock-jwt-token-xyz"
+        data.token
       );
-      document.cookie = "auth_token=mock-jwt-token-xyz; path=/";
+
+      toast.success(`Welcome back, ${data.name}!`);
       router.push("/dashboard");
-    }, 600);
+    } catch (err: any) {
+      const msg =
+        err?.response?.data?.message ??
+        err?.message ??
+        "Login failed. Please verify your credentials.";
+      toast.error(msg);
+    }
   };
 
   return (
@@ -42,34 +78,21 @@ export default function LoginPage() {
           <ShieldAlert className="w-10 h-10 text-primary" />
           <h2 className="text-2xl font-bold tracking-tight">Access Control Portal</h2>
           <p className="text-sm text-muted-foreground">
-            Sign in to access your enterprise starter workspace.
+            Sign in to access your enterprise workspace.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label="Email Address"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="admin@example.com"
-          />
-          <Input
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="••••••••"
-          />
-          <Button type="submit" loading={isLoading} className="w-full mt-2">
-            Authenticate
-          </Button>
-        </form>
+        <DynamicForm
+          schema={loginSchema}
+          onSubmit={handleLoginSubmit}
+          submitLabel="Authenticate"
+        />
 
-        <div className="text-center text-xs text-muted-foreground pt-4 border-t border-border">
-          Mock Auth Credentials: Use any credentials to sign in
+        <div className="text-center text-xs text-muted-foreground pt-4 border-t border-border flex items-center justify-center gap-1.5">
+          Don&apos;t have an account?{" "}
+          <Link href="/auth/register" className="font-semibold text-primary hover:underline">
+            Register here
+          </Link>
         </div>
       </div>
     </div>

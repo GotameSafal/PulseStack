@@ -6,3 +6,5 @@ export * from "./apiKeys";
 export * from "./alertRules";
 export * from "./incidents";
 export * from "./relations";
+export * from "./notificationChannels";
+export * from "./alertRuleChannels";

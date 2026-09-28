@@ -44,18 +44,14 @@ interface MutationData<T> {
 
 type EntityId = string | number;
 
-// ===================================================
-// NOTIFICATIONS
-// ===================================================
+import { toast } from "react-toastify";
 
 function notify(type: "success" | "error", message: string) {
   if (typeof window === "undefined") return;
-  const event = new CustomEvent("fieldops-notification", {
-    detail: { type, message },
-  });
-  window.dispatchEvent(event);
-  if (process.env.NODE_ENV !== "production") {
-    console.log(`[Notification] ${type.toUpperCase()}: ${message}`);
+  if (type === "success") {
+    toast.success(message);
+  } else {
+    toast.error(message);
   }
 }
 
@@ -165,7 +161,7 @@ export function createApiConfig<T = unknown>(options: CreateApiConfigOptions) {
   const useGetById = (
     id: EntityId,
     queryParams?: Record<string, unknown>,
-    queryOptions?: Omit<UseQueryOptions<T, Error>, "queryKey" | "queryFn" | "enabled">
+    queryOptions?: Omit<UseQueryOptions<T, Error>, "queryKey" | "queryFn">
   ) => {
     const { entityName } = config;
     const queryKey = useMemo(

@@ -3,10 +3,11 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, LayoutDashboard, LogOut, ShieldAlert } from "lucide-react";
+import { Users, LayoutDashboard, LogOut, FolderOpen, Activity, HelpCircle } from "lucide-react";
 import { useAuthStore } from "@/lib/auth/authStore";
 import { Button } from "@/components/ui/Button";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { clearAuthCookieAction } from "@/actions/authCookies";
 
 interface ShellLayoutProps {
   children: React.ReactNode;
@@ -16,13 +17,20 @@ export function ShellLayout({ children }: ShellLayoutProps) {
   const pathname = usePathname();
   const { user, logout, initAuth } = useAuthStore();
 
+  const handleLogout = async () => {
+    await clearAuthCookieAction();
+    await logout();
+  };
+
   useEffect(() => {
     initAuth();
   }, [initAuth]);
 
   const navItems = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+    { label: "Projects", href: "/dashboard/projects", icon: FolderOpen },
     { label: "Users List", href: "/dashboard/users", icon: Users },
+    { label: "Help & Docs", href: "/dashboard/help", icon: HelpCircle },
   ];
 
   return (
@@ -31,9 +39,11 @@ export function ShellLayout({ children }: ShellLayoutProps) {
       <aside className="w-64 border-r border-border bg-card flex flex-col shrink-0">
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-border">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-6 h-6 text-primary" />
-            <span className="font-bold text-lg tracking-tight">Enterprise Console</span>
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Activity className="w-5 h-5" />
+            </div>
+            <span className="font-bold text-base tracking-tight text-foreground">PulseStack</span>
           </div>
           <ThemeToggle />
         </div>
@@ -49,8 +59,8 @@ export function ShellLayout({ children }: ShellLayoutProps) {
                 key={item.href}
                 href={item.href}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
+                  ? "bg-secondary text-foreground"
+                  : "text-muted-foreground hover:bg-secondary/40 hover:text-foreground"
                   }`}
               >
                 <Icon className="w-4 h-4" />
@@ -73,7 +83,7 @@ export function ShellLayout({ children }: ShellLayoutProps) {
           </div>
           <Button
             variant="ghost"
-            onClick={logout}
+            onClick={handleLogout}
             className="w-full justify-start gap-2 text-xs"
             size="sm"
           >
@@ -83,8 +93,8 @@ export function ShellLayout({ children }: ShellLayoutProps) {
       </aside>
 
       {/* Main workspace */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-background p-8">
-        <div className="max-w-6xl w-full mx-auto">{children}</div>
+      <main className="flex-1 flex flex-col min-w-0 overflow-y-auto bg-background p-6">
+        <div className="w-full mx-auto">{children}</div>
       </main>
     </div>
   );

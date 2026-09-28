@@ -1,18 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { ChevronRight, ListFilter } from "lucide-react";
+import { ListFilter } from "lucide-react";
 import { useProjectRequests } from "@/features/analytics/hooks/useProjectRequests";
-import { DEFAULT_TIME_RANGE, DEFAULT_REFRESH_INTERVAL_MS } from "@/features/analytics/constants";
+import { useAutoRefreshInterval } from "@/features/analytics/hooks/useAutoRefreshInterval";
+import { DEFAULT_TIME_RANGE } from "@/features/analytics/constants";
 import { RequestFilters } from "./RequestFilters";
 import { RequestTable } from "./RequestTable";
 import { RequestDetailDrawer } from "./RequestDetailDrawer";
 import {
   DashboardLoadingState,
   DashboardErrorState,
-  InlineLoadingSpinner,
 } from "@/components/analytics/DashboardStates";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { TimeRangePreset, RequestExplorerItem } from "@pulsestack/shared";
 
 interface RequestExplorerProps {
@@ -27,7 +27,7 @@ export function RequestExplorer({ projectId }: RequestExplorerProps) {
   const [statusClass, setStatusClass] = useState<string>("ALL");
   const [pathSearch, setPathSearch] = useState<string>("");
   const [offset, setOffset] = useState<number>(0);
-  const [refreshIntervalMs, setRefreshIntervalMs] = useState<number>(DEFAULT_REFRESH_INTERVAL_MS);
+  const [refreshIntervalMs, setRefreshIntervalMs] = useAutoRefreshInterval();
   const [selectedRequest, setSelectedRequest] = useState<RequestExplorerItem | null>(null);
 
   const queryParams = {
@@ -78,25 +78,15 @@ export function RequestExplorer({ projectId }: RequestExplorerProps) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <header className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
-            <Link href="/dashboard" className="hover:text-foreground transition-colors">
-              Projects
-            </Link>
-            <ChevronRight className="h-3 w-3 shrink-0" aria-hidden="true" />
-            <span className="max-w-[200px] truncate font-mono text-muted-foreground">{projectId}</span>
-            <ChevronRight className="h-3 w-3 shrink-0" aria-hidden="true" />
-            <span className="text-foreground font-medium">Requests</span>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold text-foreground">Request Explorer</h1>
-            {isRefetching && <InlineLoadingSpinner />}
-          </div>
-        </div>
-      </header>
+      <PageHeader
+        title="Request Explorer"
+        isLoading={isRefetching}
+        breadcrumbs={[
+          { label: "Projects", href: "/dashboard" },
+          { label: projectId },
+          { label: "Requests" },
+        ]}
+      />
 
       {/* Filter Toolbar */}
       <RequestFilters

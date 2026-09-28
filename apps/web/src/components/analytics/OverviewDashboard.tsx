@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { useProjectOverview } from "@/features/analytics/hooks/useProjectOverview";
 import { useProjectTimeSeries } from "@/features/analytics/hooks/useProjectTimeSeries";
-import { DEFAULT_TIME_RANGE, DEFAULT_REFRESH_INTERVAL_MS } from "@/features/analytics/constants";
+import { useAutoRefreshInterval } from "@/features/analytics/hooks/useAutoRefreshInterval";
+import { DEFAULT_TIME_RANGE } from "@/features/analytics/constants";
 import { DashboardHeader } from "./DashboardHeader";
 import { MetricGrid } from "./MetricGrid";
 import { RequestVolumeChart } from "./RequestVolumeChart";
@@ -22,7 +23,7 @@ interface OverviewDashboardProps {
 
 export function OverviewDashboard({ projectId }: OverviewDashboardProps) {
   const [preset, setPreset] = useState<TimeRangePreset>(DEFAULT_TIME_RANGE);
-  const [refreshIntervalMs, setRefreshIntervalMs] = useState(DEFAULT_REFRESH_INTERVAL_MS);
+  const [refreshIntervalMs, setRefreshIntervalMs] = useAutoRefreshInterval();
 
   const overviewQuery = useProjectOverview(projectId, preset, refreshIntervalMs);
   const timeSeriesQuery = useProjectTimeSeries(projectId, preset, refreshIntervalMs);

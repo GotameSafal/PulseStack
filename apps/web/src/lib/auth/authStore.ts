@@ -32,7 +32,16 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await clearToken();
+    try {
+      const { clearAuthCookieAction } = await import("@/actions/authCookies");
+      await clearAuthCookieAction();
+    } catch {
+      // Ignore if called in non-server action context
+    }
     set({ user: null, token: null, isAuthenticated: false });
+    if (typeof window !== "undefined") {
+      window.location.href = "/auth/login";
+    }
   },
 
   initAuth: async () => {

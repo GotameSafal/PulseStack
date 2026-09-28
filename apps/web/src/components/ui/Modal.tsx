@@ -1,9 +1,7 @@
 "use client";
 
 import React from "react";
-import {
-  Modal as HeroModal,
-} from "@heroui/react";
+import { Modal as HeroModal } from "@heroui/react";
 
 export interface ModalProps {
   isOpen: boolean;
@@ -22,18 +20,31 @@ export function Modal({
   footer,
   size = "md",
 }: ModalProps) {
-  // Use state props passed from parent to control HeroModal subcomponents
   return (
     <HeroModal isOpen={isOpen} onOpenChange={onOpenChange}>
-      <HeroModal.Backdrop />
-      <HeroModal.Container size={size}>
-        <HeroModal.Dialog>
-          {title && <HeroModal.Header className="flex flex-col gap-1 border-b border-border pb-3 mb-4">{title}</HeroModal.Header>}
-          <HeroModal.Body className="py-2">{children}</HeroModal.Body>
-          {footer && <HeroModal.Footer className="border-t border-border pt-3 mt-4">{footer}</HeroModal.Footer>}
-          <HeroModal.CloseTrigger className="absolute top-4 right-4" />
-        </HeroModal.Dialog>
-      </HeroModal.Container>
+      <HeroModal.Backdrop>
+        <HeroModal.Container size={size}>
+          <HeroModal.Dialog>
+            <HeroModal.CloseTrigger className="absolute right-4 top-4" />
+
+            {title && (
+              <HeroModal.Header className="mb-1 font-semibold border-b border-border pb-3">
+                {title}
+              </HeroModal.Header>
+            )}
+
+            <HeroModal.Body className="py-0">
+              {children}
+            </HeroModal.Body>
+
+            {footer && (
+              <HeroModal.Footer className="mt-4 border-t border-border pt-3">
+                {footer}
+              </HeroModal.Footer>
+            )}
+          </HeroModal.Dialog>
+        </HeroModal.Container>
+      </HeroModal.Backdrop>
     </HeroModal>
   );
 }

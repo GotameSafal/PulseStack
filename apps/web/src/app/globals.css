@@ -1,38 +1,38 @@
 @import "tailwindcss";
 @import "@heroui/styles";
-
 @source "../../node_modules/@heroui/react/dist/**/*.{js,ts,jsx,tsx}";
 
+/* ─── PulseStack tokens (full CSS color values compatible with HeroUI) ─── */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 240 10% 3.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 240 10% 3.9%;
-  --primary: 240 5.9% 10%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
-  --accent: 240 4.8% 95.9%;
-  --accent-foreground: 240 5.9% 10%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 240 5.9% 10%;
+  --background: #ffffff;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  --primary: #18181b;
+  --primary-foreground: #fafafa;
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  --muted: #71717a;
+  --muted-foreground: #71717a;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b;
   --radius: 0.5rem;
 
   /* PulseStack Telemetry Status Colors */
-  --ps-success: 142 71% 45%;
-  --ps-warning: 38 92% 50%;
-  --ps-danger: 0 84% 60%;
-  --ps-info: 199 89% 48%;
+  --ps-success: #22c55e;
+  --ps-warning: #f59e0b;
+  --ps-danger: #ef4444;
+  --ps-info: #0ea5e9;
 
-  /* PulseStack Brand Accent (Indigo) */
-  --ps-indigo: 239 84% 67%;
+  /* PulseStack Brand Accent */
+  --ps-indigo: #6366f1;
 
   /* PulseStack Chart Palette */
   --ps-chart-volume: #6366f1;
@@ -43,62 +43,62 @@
 }
 
 .dark {
-  --background: 224 25% 6%;
-  --foreground: 210 20% 98%;
-  --card: 224 20% 9%;
-  --card-foreground: 210 20% 98%;
-  --popover: 224 22% 10%;
-  --popover-foreground: 210 20% 98%;
-  --primary: 239 84% 67%;
-  --primary-foreground: 0 0% 100%;
-  --secondary: 224 18% 12%;
-  --secondary-foreground: 210 20% 98%;
-  --muted: 224 18% 12%;
-  --muted-foreground: 217 12% 64%;
-  --accent: 224 18% 12%;
-  --accent-foreground: 210 20% 98%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 224 15% 16%;
-  --input: 224 15% 16%;
-  --ring: 239 84% 67%;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #121215;
+  --card-foreground: #fafafa;
+  --popover: #18181b;
+  --popover-foreground: #fafafa;
+  --primary: #6366f1;
+  --primary-foreground: #ffffff;
+  --secondary: #1e1e24;
+  --secondary-foreground: #fafafa;
+  --muted: #71717a;
+  --muted-foreground: #a1a1aa;
+  --accent: #1e1e24;
+  --accent-foreground: #fafafa;
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #6366f1;
 
   /* PulseStack Telemetry Status Colors (same in dark) */
-  --ps-success: 142 71% 45%;
-  --ps-warning: 38 92% 50%;
-  --ps-danger: 0 84% 60%;
-  --ps-info: 199 89% 48%;
+  --ps-success: #22c55e;
+  --ps-warning: #f59e0b;
+  --ps-danger: #ef4444;
+  --ps-info: #0ea5e9;
 
   /* PulseStack Brand Accent */
-  --ps-indigo: 239 84% 67%;
+  --ps-indigo: #6366f1;
 }
 
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
 }

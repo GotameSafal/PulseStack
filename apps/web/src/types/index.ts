@@ -6,6 +6,8 @@ export interface User {
   name: string;
   role: UserRole;
   permissions: string[];
+  /** Active organization this user belongs to */
+  organizationId?: string;
 }
 
 export type Permission =

@@ -10,8 +10,8 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname();
 
-  // If we are under a project route (/dashboard/projects/*), ProjectShellLayout handles its own shell
-  if (pathname.startsWith("/dashboard/projects")) {
+  // If we are under a specific project workspace (/dashboard/projects/[id]/*), ProjectShellLayout handles its own shell
+  if (pathname.startsWith("/dashboard/projects/")) {
     return <>{children}</>;
   }
 

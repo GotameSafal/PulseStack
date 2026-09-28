@@ -11,23 +11,14 @@ interface RetryAxiosRequestConfig extends InternalAxiosRequestConfig {
   _retry?: boolean;
 }
 
-const version = "/api/v1/en";
+const version = "/v1";
 const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: `${apiUrl}${version}`,
   timeout: 10000,
-  withCredentials: true, // SUPER IMPORTANT for sending cookies
+  withCredentials: true,
 });
-
-// Helper to extract farmId from URL pathname
-const getFarmIdFromUrl = (): string | null => {
-  if (typeof window === "undefined") return null;
-
-  // Match pattern: /farms/[farmId]/...
-  const match = window.location.pathname.match(/\/farms\/([^\/]+)/);
-  return match ? match[1] : null;
-};
 
 // ===================================================
 // REQUEST INTERCEPTOR (PRE)
@@ -38,14 +29,10 @@ axiosInstance.interceptors.request.use(
     // Set custom headers
     config.headers.set("X-Requested-With", "XMLHttpRequest");
 
-    // Cookie is sent automatically withCredentials: true
-
-    // Inject Farm ID from URL if not already set explicitly
-    if (!config.headers.get("x-farm-id")) {
-      const farmId = getFarmIdFromUrl();
-      if (farmId) {
-        config.headers.set("x-farm-id", farmId);
-      }
+    // Attach Bearer token if present
+    const token = await getAuthToken();
+    if (token && !config.headers.get("Authorization")) {
+      config.headers.set("Authorization", `Bearer ${token}`);
     }
 
     // Inject language preference from localStorage (set by i18n)
@@ -95,6 +82,11 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async (error) => {
+    // Ignore canceled/aborted requests (e.g. component unmount, Fast Refresh, TanStack Query aborts)
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     const originalRequest = error.config as RetryAxiosRequestConfig;
 
     // Log errors in development
@@ -107,8 +99,6 @@ axiosInstance.interceptors.response.use(
     }
 
     // Handle 401 Unauthorized - Token expired or invalid
-    // Since we're using cookie-based auth, we can't refresh tokens client-side
-    // The cookie is HttpOnly and managed by the backend
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -135,7 +125,7 @@ axiosInstance.interceptors.response.use(
           const returnUrl = encodeURIComponent(
             window.location.pathname + window.location.search,
           );
-          window.location.href = `/auth?returnUrl=${returnUrl}`;
+          window.location.href = `/auth/login?returnUrl=${returnUrl}`;
         }
       }
 
@@ -147,8 +137,8 @@ axiosInstance.interceptors.response.use(
       console.error("Access forbidden:", error.response?.data?.message);
     }
 
-    // Handle network errors
-    if (!error.response) {
+    // Handle actual network connection errors (server down, CORS failure, offline)
+    if (!error.response && error.code === "ERR_NETWORK") {
       console.error("Network error - please check your connection");
     }
 

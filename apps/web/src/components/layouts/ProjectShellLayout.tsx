@@ -10,9 +10,11 @@ import {
   AlertTriangle,
   Bell,
   Siren,
-  KeyRound,
+  Settings,
+  HelpCircle,
   LogOut,
   ChevronLeft,
+  Webhook,
 } from "lucide-react";
 import { useAuthStore } from "@/lib/auth/authStore";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
@@ -64,9 +66,19 @@ export function ProjectShellLayout({ children, projectId }: ProjectShellLayoutPr
       icon: Siren,
     },
     {
-      label: "API Keys",
+      label: "Notifications",
+      href: `/dashboard/projects/${projectId}/notifications`,
+      icon: Webhook,
+    },
+    {
+      label: "Settings",
       href: `/dashboard/projects/${projectId}/settings`,
-      icon: KeyRound,
+      icon: Settings,
+    },
+    {
+      label: "Help & Docs",
+      href: "/dashboard/help",
+      icon: HelpCircle,
     },
   ];
 

@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
-import { ChevronRight, ShieldAlert } from "lucide-react";
+import { ShieldAlert } from "lucide-react";
 import { useProjectErrors } from "@/features/analytics/hooks/useProjectErrors";
-import { DEFAULT_TIME_RANGE, DEFAULT_REFRESH_INTERVAL_MS } from "@/features/analytics/constants";
+import { useAutoRefreshInterval } from "@/features/analytics/hooks/useAutoRefreshInterval";
+import { DEFAULT_TIME_RANGE } from "@/features/analytics/constants";
 import { TimeRangeSelector } from "@/components/analytics/TimeRangeSelector";
 import { AutoRefreshSelector } from "@/components/analytics/AutoRefreshSelector";
 import { ErrorList } from "./ErrorList";
@@ -12,8 +12,8 @@ import { StackTraceViewer } from "./StackTraceViewer";
 import {
   DashboardLoadingState,
   DashboardErrorState,
-  InlineLoadingSpinner,
 } from "@/components/analytics/DashboardStates";
+import { PageHeader } from "@/components/ui/PageHeader";
 import type { TimeRangePreset } from "@pulsestack/shared";
 
 interface ErrorInspectorProps {
@@ -22,7 +22,7 @@ interface ErrorInspectorProps {
 
 export function ErrorInspector({ projectId }: ErrorInspectorProps) {
   const [preset, setPreset] = useState<TimeRangePreset>(DEFAULT_TIME_RANGE);
-  const [refreshIntervalMs, setRefreshIntervalMs] = useState<number>(DEFAULT_REFRESH_INTERVAL_MS);
+  const [refreshIntervalMs, setRefreshIntervalMs] = useAutoRefreshInterval();
   const [selectedGroupKey, setSelectedGroupKey] = useState<string | null>(null);
 
   const { data, isLoading, isError, isFetching, error, refetch } = useProjectErrors(
@@ -46,34 +46,24 @@ export function ErrorInspector({ projectId }: ErrorInspectorProps) {
   return (
     <div className="space-y-4">
       {/* Header */}
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          {/* Breadcrumb */}
-          <nav aria-label="Breadcrumb" className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
-            <Link href="/dashboard" className="hover:text-foreground transition-colors">
-              Projects
-            </Link>
-            <ChevronRight className="h-3 w-3 shrink-0" aria-hidden="true" />
-            <span className="max-w-[200px] truncate font-mono text-muted-foreground">{projectId}</span>
-            <ChevronRight className="h-3 w-3 shrink-0" aria-hidden="true" />
-            <span className="text-foreground font-medium">Errors</span>
-          </nav>
-
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold text-foreground">Error Inspector</h1>
-            {isRefetching && <InlineLoadingSpinner />}
-          </div>
-        </div>
-
-        {/* Toolbar Controls */}
-        <div className="flex flex-wrap items-center gap-2">
-          <AutoRefreshSelector
-            value={refreshIntervalMs}
-            onChange={setRefreshIntervalMs}
-          />
-          <TimeRangeSelector value={preset} onChange={setPreset} />
-        </div>
-      </header>
+      <PageHeader
+        title="Error Inspector"
+        isLoading={isRefetching}
+        breadcrumbs={[
+          { label: "Projects", href: "/dashboard" },
+          { label: projectId },
+          { label: "Errors" },
+        ]}
+        actions={
+          <>
+            <AutoRefreshSelector
+              value={refreshIntervalMs}
+              onChange={setRefreshIntervalMs}
+            />
+            <TimeRangeSelector value={preset} onChange={setPreset} />
+          </>
+        }
+      />
 
       {/* KPI Stats Pill Row */}
       {!isLoading && !isError && !isEmpty && (

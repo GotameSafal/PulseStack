@@ -18,8 +18,23 @@ set -e
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
+# ------------------------------------------------------------------------------
+# Parse flags
+# ------------------------------------------------------------------------------
+PROD_MODE=false
+for arg in "$@"; do
+  case $arg in
+    --prod) PROD_MODE=true ;;
+  esac
+done
+
 echo "=================================================="
 echo "          Starting PulseStack Environment         "
+if [ "$PROD_MODE" = true ]; then
+  echo "          Mode: PRODUCTION (web built + next start)"
+else
+  echo "          Mode: DEVELOPMENT (next dev with HMR)"
+fi
 echo "=================================================="
 
 # ------------------------------------------------------------------------------
@@ -82,7 +97,11 @@ echo "[✔] All infrastructure containers are healthy."
 # 3. Run Database Migrations
 # ------------------------------------------------------------------------------
 echo ""
-echo "[2/4] Running PostgreSQL database migrations..."
+echo "[2/4] Building shared workspace packages..."
+pnpm --filter @pulsestack/shared build
+pnpm --filter @pulsestack/database build
+
+echo "[3/4] Running PostgreSQL database migrations..."
 DATABASE_URL="${DATABASE_URL:-postgresql://pulsestack:pulsestack_secret@localhost:5432/pulsestack}" \
 pnpm --filter @pulsestack/database db:migrate
 
@@ -90,7 +109,7 @@ pnpm --filter @pulsestack/database db:migrate
 # 4. Start Applications (API, Worker, Web)
 # ------------------------------------------------------------------------------
 echo ""
-echo "[3/4] Launching PulseStack apps..."
+echo "[4/4] Launching PulseStack apps..."
 
 # Track child PIDs for graceful shutdown
 API_PID=""
@@ -138,8 +157,17 @@ pnpm --filter @pulsestack/worker dev &
 WORKER_PID=$!
 
 # Start Web Frontend
-echo "Starting Web on http://localhost:3000..."
-PORT=3000 pnpm --filter @pulsestack/web dev --port 3000 &
+if [ "$PROD_MODE" = true ]; then
+  echo "Building Web for production..."
+  # Unset NODE_ENV so Next.js sets it to 'production' itself
+  # (sourcing root .env sets NODE_ENV=development which breaks next build)
+  NODE_ENV=production pnpm --filter @pulsestack/web build
+  echo "Starting Web (production) on http://localhost:3000..."
+  NODE_ENV=production PORT=3000 pnpm --filter @pulsestack/web start --port 3000 &
+else
+  echo "Starting Web (dev) on http://localhost:3000..."
+  PORT=3000 pnpm --filter @pulsestack/web dev --port 3000 &
+fi
 WEB_PID=$!
 
 echo ""
