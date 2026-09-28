@@ -44,6 +44,11 @@ if [ ! -f "$ROOT_DIR/apps/api/.env" ]; then
   cp "$ROOT_DIR/.env" "$ROOT_DIR/apps/api/.env"
 fi
 
+if [ ! -f "$ROOT_DIR/apps/worker/.env" ]; then
+  echo "[-] Creating apps/worker/.env..."
+  cp "$ROOT_DIR/.env" "$ROOT_DIR/apps/worker/.env"
+fi
+
 if [ ! -f "$ROOT_DIR/apps/web/.env.local" ]; then
   echo "[-] Creating apps/web/.env.local..."
   echo "NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}" > "$ROOT_DIR/apps/web/.env.local"
@@ -134,7 +139,7 @@ WORKER_PID=$!
 
 # Start Web Frontend
 echo "Starting Web on http://localhost:3000..."
-pnpm --filter @pulsestack/web dev &
+PORT=3000 pnpm --filter @pulsestack/web dev --port 3000 &
 WEB_PID=$!
 
 echo ""
